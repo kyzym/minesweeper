@@ -1,5 +1,5 @@
 html {
-  font-size: 10px; /* Now 10px = 1rem */
+  font-size: 10px;
 }
 
 body {
@@ -53,11 +53,19 @@ body {
 .mine {
   background-color: #ff6347;
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .number {
   background-color: #fafad2;
   color: #333;
+}
+
+.cell-content {
+  font-size: 3rem;
+  position: absolute;
 }
 
 @media screen and (max-width: 300px) {
