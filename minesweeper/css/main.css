@@ -48,7 +48,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: url("../assets/images/boot.png"), auto;
   user-select: none;
   border-radius: 0.15rem;
   box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.3);
@@ -80,6 +80,11 @@ body {
 .cell-content {
   font-size: 3rem;
   position: absolute;
+}
+
+.flag {
+  background-image: url("../assets/images/flag-icon.png");
+  background-size: cover;
 }
 
 /*# sourceMappingURL=main.css.map */

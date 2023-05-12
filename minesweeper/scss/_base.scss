@@ -41,7 +41,7 @@ body {
 .cell {
   background-color: $cell-bg-color;
   @include centerize;
-  cursor: pointer;
+  cursor: url('../assets/images/boot.png'), auto;
   user-select: none;
   border-radius: 0.15rem;
   box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.3);
@@ -72,4 +72,9 @@ body {
 .cell-content {
   font-size: $cell-content-font-size;
   position: absolute;
+}
+
+.flag {
+  background-image: url('../assets/images/flag-icon.png');
+  background-size: cover;
 }

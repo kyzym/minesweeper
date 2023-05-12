@@ -1,70 +1,29 @@
+// Import the setColor function
 import { setColor } from './setColor.js';
 
+// Define constants for the size of the board and the number of mines
 const SIZE = 10;
 const MINES = 10;
+
+// Initialize game state variables
 let moves = 0;
 let startTime;
 let firstMoveMade = false;
 let gameOver = false;
 
-// Create data structures for the mine locations and opened cells
+// Create the game board and sets to keep track of mines, opened cells, and flagged cells
+const board = Array(SIZE)
+  .fill()
+  .map(() => Array(SIZE).fill(0));
 const mineLocations = new Set();
 const openedCells = new Set();
+const flaggedCells = new Set(); // Added set for flagged cells
 
-// Initialize the board with zeros
-function initBoard() {
-  const board = Array(SIZE)
-    .fill()
-    .map(() => Array(SIZE).fill(0));
-  return board;
-}
-
-// Place mines in random locations on the board
-function placeMines(board, mineLocations, exclude) {
-  while (mineLocations.size < MINES) {
-    const x = Math.floor(Math.random() * SIZE);
-    const y = Math.floor(Math.random() * SIZE);
-
-    if (
-      !mineLocations.has(`${x},${y}`) &&
-      (x !== exclude.i || y !== exclude.j)
-    ) {
-      mineLocations.add(`${x},${y}`);
-      board[x][y] = 'M';
-    }
-  }
-  return board;
-}
-
-// Count the mines adjacent to each cell and update the cell's value accordingly
-function countAdjacentMines(board) {
-  for (let i = 0; i < SIZE; i++) {
-    for (let j = 0; j < SIZE; j++) {
-      if (board[i][j] !== 'M') {
-        let mines = 0;
-        for (let x = Math.max(i - 1, 0); x <= Math.min(i + 1, SIZE - 1); x++) {
-          for (
-            let y = Math.max(j - 1, 0);
-            y <= Math.min(j + 1, SIZE - 1);
-            y++
-          ) {
-            if (board[x][y] === 'M') {
-              mines++;
-            }
-          }
-        }
-        board[i][j] = mines || '0';
-      }
-    }
-  }
-  return board;
-}
-
-let board = initBoard();
-
+// Create the game container element
 const container = document.createElement('div');
 container.classList.add('minesweeper');
 
+// Create cells for the game board
 for (let i = 0; i < SIZE; i++) {
   for (let j = 0; j < SIZE; j++) {
     const cell = document.createElement('div');
@@ -73,14 +32,69 @@ for (let i = 0; i < SIZE; i++) {
     cell.classList.add('cell');
     cellContent.classList.add('cell-content');
     cell.appendChild(cellContent);
+
+    // Add a right-click (contextmenu) event listener for flagging cells
+    cell.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+
+      if (openedCells.has(`${i},${j}`)) {
+        return;
+      }
+
+      if (flaggedCells.has(`${i},${j}`)) {
+        flaggedCells.delete(`${i},${j}`);
+        cell.classList.remove('flag');
+      } else {
+        flaggedCells.add(`${i},${j}`);
+        cell.classList.add('flag');
+      }
+    });
+
+    // Add a click event listener for opening cells
     cell.addEventListener('click', () => {
-      if (gameOver) {
+      if (gameOver || flaggedCells.has(`${i},${j}`)) {
         return;
       }
 
       if (!firstMoveMade) {
-        board = placeMines(board, mineLocations, { i, j });
-        board = countAdjacentMines(board);
+        // Generate mines after the first move
+        while (mineLocations.size < MINES) {
+          const x = Math.floor(Math.random() * SIZE);
+          const y = Math.floor(Math.random() * SIZE);
+
+          if (!mineLocations.has(`${x},${y}`) && (x !== i || y !== j)) {
+            mineLocations.add(`${x},${y}`);
+            board[x][y] = 'M';
+          }
+        }
+
+        // Calculate numbers for cells
+        for (let x = 0; x < SIZE; x++) {
+          for (let y = 0; y < SIZE; y++) {
+            if (board[x][y] !== 'M') {
+              let mines = 0;
+
+              for (
+                let dx = Math.max(x - 1, 0);
+                dx <= Math.min(x + 1, SIZE - 1);
+                dx++
+              ) {
+                for (
+                  let dy = Math.max(y - 1, 0);
+                  dy <= Math.min(y + 1, SIZE - 1);
+                  dy++
+                ) {
+                  if (board[dx][dy] === 'M') {
+                    mines++;
+                  }
+                }
+              }
+
+              board[x][y] = mines || '0';
+            }
+          }
+        }
+
         firstMoveMade = true;
       }
 
@@ -99,6 +113,7 @@ for (let i = 0; i < SIZE; i++) {
       } else {
         cell.classList.remove('cell');
         cell.classList.add('number');
+
         cellContent.textContent = board[i][j];
         setColor(cellContent, board[i][j].toString());
         openedCells.add(`${i},${j}`);
