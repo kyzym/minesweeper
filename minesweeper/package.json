@@ -1,0 +1,12 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "minesweeper.js",
+  "scripts": {
+    "sass": "sass --watch scss:css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -4,8 +4,8 @@ html {
 
 body {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -24,6 +24,24 @@ body {
   width: 50rem;
   height: 50rem;
 }
+@media screen and (max-width: 300px) {
+  .minesweeper {
+    width: 30rem;
+    height: 30rem;
+  }
+}
+@media screen and (max-width: 500px) {
+  .minesweeper {
+    width: 40rem;
+    height: 40rem;
+  }
+}
+@media screen and (max-width: 767px) {
+  .minesweeper {
+    width: 60rem;
+    height: 60rem;
+  }
+}
 
 .cell {
   background-color: #8fbc8f;
@@ -36,7 +54,6 @@ body {
   box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.3);
   transition: background-color 0.3s;
 }
-
 .cell:hover {
   background-color: #7cb37c;
 }
@@ -53,9 +70,6 @@ body {
 .mine {
   background-color: #ff6347;
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .number {
@@ -68,23 +82,4 @@ body {
   position: absolute;
 }
 
-@media screen and (max-width: 300px) {
-  .minesweeper {
-    width: 30rem;
-    height: 30rem;
-  }
-}
-
-@media screen and (max-width: 500px) {
-  .minesweeper {
-    width: 40rem;
-    height: 40rem;
-  }
-}
-
-@media screen and (max-width: 767px) {
-  .minesweeper {
-    width: 60rem;
-    height: 60rem;
-  }
-}
+/*# sourceMappingURL=main.css.map */

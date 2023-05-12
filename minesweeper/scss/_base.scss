@@ -1,0 +1,75 @@
+html {
+  font-size: $font-size;
+}
+
+body {
+  @include centerize;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: $body-bg-color;
+}
+
+.minesweeper {
+  display: grid;
+  grid-template-columns: repeat($grid-size, 1fr);
+  gap: 0.5rem;
+  border: 1rem solid $border-color;
+  padding: 1rem;
+  background-color: $minesweeper-bg-color;
+  border-radius: 1rem;
+  width: 50rem;
+  height: 50rem;
+
+  @include responsive(small) {
+    width: 30rem;
+    height: 30rem;
+  }
+
+  @include responsive(medium) {
+    width: 40rem;
+    height: 40rem;
+  }
+
+  @include responsive(large) {
+    width: 60rem;
+    height: 60rem;
+  }
+}
+
+.cell {
+  background-color: $cell-bg-color;
+  @include centerize;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 0.15rem;
+  box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: $cell-hover-bg-color;
+  }
+}
+
+.mine,
+.number {
+  width: 100%;
+  height: 100%;
+  @include centerize;
+}
+
+.mine {
+  background-color: $mine-bg-color;
+  color: $mine-color;
+}
+
+.number {
+  background-color: $number-bg-color;
+  color: $number-color;
+}
+
+.cell-content {
+  font-size: $cell-content-font-size;
+  position: absolute;
+}
