@@ -1,42 +1,66 @@
+import { setColor } from './setColor.js';
+
 const SIZE = 10;
 const MINES = 10;
 let moves = 0;
 let startTime;
+let firstMoveMade = false;
 let gameOver = false;
 
-const board = Array(SIZE)
-  .fill()
-  .map(() => Array(SIZE).fill(0));
+// Create data structures for the mine locations and opened cells
 const mineLocations = new Set();
 const openedCells = new Set();
 
-while (mineLocations.size < MINES) {
-  const x = Math.floor(Math.random() * SIZE);
-  const y = Math.floor(Math.random() * SIZE);
-
-  if (!mineLocations.has(`${x},${y}`)) {
-    mineLocations.add(`${x},${y}`);
-    board[x][y] = 'M';
-  }
+// Initialize the board with zeros
+function initBoard() {
+  const board = Array(SIZE)
+    .fill()
+    .map(() => Array(SIZE).fill(0));
+  return board;
 }
 
-for (let i = 0; i < SIZE; i++) {
-  for (let j = 0; j < SIZE; j++) {
-    if (board[i][j] !== 'M') {
-      let mines = 0;
+// Place mines in random locations on the board
+function placeMines(board, mineLocations, exclude) {
+  while (mineLocations.size < MINES) {
+    const x = Math.floor(Math.random() * SIZE);
+    const y = Math.floor(Math.random() * SIZE);
 
-      for (let x = Math.max(i - 1, 0); x <= Math.min(i + 1, SIZE - 1); x++) {
-        for (let y = Math.max(j - 1, 0); y <= Math.min(j + 1, SIZE - 1); y++) {
-          if (board[x][y] === 'M') {
-            mines++;
-          }
-        }
-      }
-
-      board[i][j] = mines || '0';
+    if (
+      !mineLocations.has(`${x},${y}`) &&
+      (x !== exclude.i || y !== exclude.j)
+    ) {
+      mineLocations.add(`${x},${y}`);
+      board[x][y] = 'M';
     }
   }
+  return board;
 }
+
+// Count the mines adjacent to each cell and update the cell's value accordingly
+function countAdjacentMines(board) {
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      if (board[i][j] !== 'M') {
+        let mines = 0;
+        for (let x = Math.max(i - 1, 0); x <= Math.min(i + 1, SIZE - 1); x++) {
+          for (
+            let y = Math.max(j - 1, 0);
+            y <= Math.min(j + 1, SIZE - 1);
+            y++
+          ) {
+            if (board[x][y] === 'M') {
+              mines++;
+            }
+          }
+        }
+        board[i][j] = mines || '0';
+      }
+    }
+  }
+  return board;
+}
+
+let board = initBoard();
 
 const container = document.createElement('div');
 container.classList.add('minesweeper');
@@ -54,6 +78,12 @@ for (let i = 0; i < SIZE; i++) {
         return;
       }
 
+      if (!firstMoveMade) {
+        board = placeMines(board, mineLocations, { i, j });
+        board = countAdjacentMines(board);
+        firstMoveMade = true;
+      }
+
       if (!startTime) {
         startTime = Date.now();
       }
@@ -69,7 +99,6 @@ for (let i = 0; i < SIZE; i++) {
       } else {
         cell.classList.remove('cell');
         cell.classList.add('number');
-
         cellContent.textContent = board[i][j];
         setColor(cellContent, board[i][j].toString());
         openedCells.add(`${i},${j}`);
@@ -90,32 +119,3 @@ for (let i = 0; i < SIZE; i++) {
 }
 
 document.body.appendChild(container);
-
-function setColor(cellContent, number) {
-  switch (number) {
-    case '1':
-      cellContent.style.color = 'blue';
-      break;
-    case '2':
-      cellContent.style.color = 'green';
-      break;
-    case '3':
-      cellContent.style.color = 'red';
-      break;
-    case '4':
-      cellContent.style.color = 'purple';
-      break;
-    case '5':
-      cellContent.style.color = 'maroon';
-      break;
-    case '6':
-      cellContent.style.color = 'turquoise';
-      break;
-    case '7':
-      cellContent.style.color = 'black';
-      break;
-    case '8':
-      cellContent.style.color = 'gray';
-      break;
-  }
-}
