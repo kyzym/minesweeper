@@ -1,136 +1,275 @@
-// Import the setColor function
 import { setColor } from './setColor.js';
 
-// Define constants for the size of the board and the number of mines
 const SIZE = 10;
 const MINES = 10;
+const GAME_OVER_MSG = 'Game over. Try again';
+const VICTORY_MSG = 'Hooray! You found all mines in ';
 
-// Initialize game state variables
 let moves = 0;
 let startTime;
 let firstMoveMade = false;
 let gameOver = false;
+let intervalId = null;
 
-// Create the game board and sets to keep track of mines, opened cells, and flagged cells
+// Define data structures
 const board = Array(SIZE)
   .fill()
   .map(() => Array(SIZE).fill(0));
 const mineLocations = new Set();
 const openedCells = new Set();
-const flaggedCells = new Set(); // Added set for flagged cells
+const flaggedCells = new Set();
 
-// Create the game container element
-const container = document.createElement('div');
-container.classList.add('minesweeper');
+const container = createDiv('minesweeper');
+const timeDisplay = createDiv('time-display');
+const movesDisplay = createDiv('moves-display');
+const restartButton = createButton(
+  'restart-button',
+  'New game',
+  initializeGame
+);
 
-// Create cells for the game board
-for (let i = 0; i < SIZE; i++) {
-  for (let j = 0; j < SIZE; j++) {
-    const cell = document.createElement('div');
-    const cellContent = document.createElement('span');
+updateTimeDisplay(0);
+updateMovesDisplay(0);
 
-    cell.classList.add('cell');
-    cellContent.classList.add('cell-content');
-    cell.appendChild(cellContent);
+document.body.appendChild(restartButton);
+document.body.appendChild(timeDisplay);
+document.body.appendChild(movesDisplay);
+document.body.appendChild(container);
 
-    // Add a right-click (contextmenu) event listener for flagging cells
-    cell.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
+function createDiv(className) {
+  const div = document.createElement('div');
+  div.classList.add(className);
+  return div;
+}
 
-      if (openedCells.has(`${i},${j}`)) {
-        return;
-      }
+function createButton(id, text, onClick) {
+  const button = document.createElement('button');
+  button.id = id;
+  button.textContent = text;
+  button.addEventListener('click', onClick);
+  return button;
+}
 
-      if (flaggedCells.has(`${i},${j}`)) {
-        flaggedCells.delete(`${i},${j}`);
-        cell.classList.remove('flag');
-      } else {
-        flaggedCells.add(`${i},${j}`);
-        cell.classList.add('flag');
-      }
-    });
+function updateTimeDisplay(time) {
+  timeDisplay.textContent = `Time: ${time} s`;
+}
 
-    // Add a click event listener for opening cells
-    cell.addEventListener('click', () => {
-      if (gameOver || flaggedCells.has(`${i},${j}`)) {
-        return;
-      }
+function updateMovesDisplay(moves) {
+  movesDisplay.textContent = `Moves: ${moves}`;
+}
 
-      if (!firstMoveMade) {
-        // Generate mines after the first move
-        while (mineLocations.size < MINES) {
-          const x = Math.floor(Math.random() * SIZE);
-          const y = Math.floor(Math.random() * SIZE);
+function initializeGame() {
+  resetGameVariables();
+  clearGameBoard();
 
-          if (!mineLocations.has(`${x},${y}`) && (x !== i || y !== j)) {
-            mineLocations.add(`${x},${y}`);
-            board[x][y] = 'M';
-          }
-        }
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      const cell = createGameCell(i, j);
+      container.appendChild(cell);
+    }
+  }
+}
 
-        // Calculate numbers for cells
-        for (let x = 0; x < SIZE; x++) {
-          for (let y = 0; y < SIZE; y++) {
-            if (board[x][y] !== 'M') {
-              let mines = 0;
+function resetGameVariables() {
+  moves = 0;
+  startTime = null;
+  firstMoveMade = false;
+  gameOver = false;
 
-              for (
-                let dx = Math.max(x - 1, 0);
-                dx <= Math.min(x + 1, SIZE - 1);
-                dx++
-              ) {
-                for (
-                  let dy = Math.max(y - 1, 0);
-                  dy <= Math.min(y + 1, SIZE - 1);
-                  dy++
-                ) {
-                  if (board[dx][dy] === 'M') {
-                    mines++;
-                  }
-                }
-              }
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
 
-              board[x][y] = mines || '0';
+  board.forEach((row) => row.fill(0));
+  mineLocations.clear();
+  openedCells.clear();
+  flaggedCells.clear();
+
+  updateTimeDisplay(0);
+  updateMovesDisplay(0);
+}
+
+function clearGameBoard() {
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+}
+
+function createGameCell(i, j) {
+  const cell = document.createElement('div');
+  const cellContent = document.createElement('span');
+
+  cell.classList.add('cell');
+  cellContent.classList.add('cell-content');
+  cell.appendChild(cellContent);
+
+  cell.addEventListener('contextmenu', handleRightClick.bind(null, cell, i, j));
+  cell.addEventListener(
+    'click',
+    handleLeftClick.bind(null, cell, cellContent, i, j)
+  );
+
+  return cell;
+}
+
+function handleRightClick(cell, i, j, e) {
+  e.preventDefault();
+  if (gameOver || openedCells.has(`${i},${j}`)) {
+    return;
+  }
+
+  if (flaggedCells.has(`${i},${j}`)) {
+    flaggedCells.delete(`${i},${j}`);
+    cell.classList.remove('flag');
+  } else {
+    flaggedCells.add(`${i},${j}`);
+    cell.classList.add('flag');
+  }
+}
+
+function handleLeftClick(cell, cellContent, i, j) {
+  if (
+    gameOver ||
+    flaggedCells.has(`${i},${j}`) ||
+    openedCells.has(`${i},${j}`)
+  ) {
+    return;
+  }
+
+  // Place the mines after the first move
+  if (!firstMoveMade) {
+    placeMines(i, j);
+    firstMoveMade = true;
+  }
+
+  // Start the timer after the first move
+  if (!startTime) {
+    startTimer();
+  }
+
+  moves++;
+  updateMovesDisplay(moves);
+
+  if (board[i][j] === 'M') {
+    showMines();
+    gameOver = true;
+    setTimeout(() => {
+      alert(GAME_OVER_MSG);
+    }, 100);
+  } else {
+    showNumber(cell, cellContent, i, j);
+    if (openedCells.size === SIZE * SIZE - MINES) {
+      endGame();
+    }
+  }
+}
+
+function placeMines(i, j) {
+  while (mineLocations.size < MINES) {
+    const x = Math.floor(Math.random() * SIZE);
+    const y = Math.floor(Math.random() * SIZE);
+
+    if (!mineLocations.has(`${x},${y}`) && (x !== i || y !== j)) {
+      mineLocations.add(`${x},${y}`);
+      board[x][y] = 'M';
+    }
+  }
+
+  calculateNumbers();
+}
+
+function calculateNumbers() {
+  for (let x = 0; x < SIZE; x++) {
+    for (let y = 0; y < SIZE; y++) {
+      if (board[x][y] !== 'M') {
+        let mines = 0;
+
+        for (
+          let dx = Math.max(x - 1, 0);
+          dx <= Math.min(x + 1, SIZE - 1);
+          dx++
+        ) {
+          for (
+            let dy = Math.max(y - 1, 0);
+            dy <= Math.min(y + 1, SIZE - 1);
+            dy++
+          ) {
+            if (board[dx][dy] === 'M') {
+              mines++;
             }
           }
         }
 
-        firstMoveMade = true;
+        board[x][y] = mines || '0';
       }
-
-      if (!startTime) {
-        startTime = Date.now();
-      }
-
-      moves++;
-
-      if (board[i][j] === 'M') {
-        gameOver = true;
-        cell.classList.remove('cell');
-        cell.classList.add('mine');
-        cellContent.textContent = 'M';
-        alert('Game over. Try again');
-      } else {
-        cell.classList.remove('cell');
-        cell.classList.add('number');
-
-        cellContent.textContent = board[i][j];
-        setColor(cellContent, board[i][j].toString());
-        openedCells.add(`${i},${j}`);
-
-        if (openedCells.size === SIZE * SIZE - MINES) {
-          const endTime = Date.now();
-          const timeTaken = Math.round((endTime - startTime) / 1000);
-          alert(
-            `Hooray! You found all mines in ${timeTaken} seconds and ${moves} moves!`
-          );
-          gameOver = true;
-        }
-      }
-    });
-
-    container.appendChild(cell);
+    }
   }
 }
 
-document.body.appendChild(container);
+function startTimer() {
+  startTime = Date.now();
+  intervalId = setInterval(() => {
+    if (gameOver) {
+      clearInterval(intervalId);
+    } else {
+      const currentTime = Math.floor((Date.now() - startTime) / 1000);
+      updateTimeDisplay(currentTime);
+    }
+  }, 1000);
+}
+
+function showMines() {
+  for (const mineLocation of mineLocations) {
+    const [mineX, mineY] = mineLocation.split(',').map(Number);
+    const mineCell = container.children[mineX * SIZE + mineY];
+    mineCell.classList.remove('cell');
+    mineCell.classList.add('mine');
+    mineCell.children[0].textContent = 'M';
+  }
+}
+
+function showNumber(cell, cellContent, i, j) {
+  cell.classList.remove('cell');
+  cell.classList.add('number');
+
+  cellContent.textContent = board[i][j];
+  setColor(cellContent, board[i][j].toString());
+  openedCells.add(`${i},${j}`);
+
+  if (board[i][j] === '0') {
+    openAdjacentCells(i, j);
+  }
+}
+
+function openAdjacentCells(i, j) {
+  for (let dx = Math.max(i - 1, 0); dx <= Math.min(i + 1, SIZE - 1); dx++) {
+    for (let dy = Math.max(j - 1, 0); dy <= Math.min(j + 1, SIZE - 1); dy++) {
+      if (!openedCells.has(`${dx},${dy}`) && board[dx][dy] !== 'M') {
+        const cell = container.children[dx * SIZE + dy];
+        const cellContent = cell.children[0];
+        cell.classList.remove('cell');
+        cell.classList.add('number');
+        cellContent.textContent = board[dx][dy];
+        setColor(cellContent, board[dx][dy].toString());
+        openedCells.add(`${dx},${dy}`);
+        if (board[dx][dy] === '0') {
+          openAdjacentCells(dx, dy);
+        }
+      }
+    }
+  }
+}
+
+function endGame() {
+  const endTime = Date.now();
+  const timeTaken = Math.round((endTime - startTime) / 1000);
+  alert(`${VICTORY_MSG}${timeTaken} seconds and ${moves} moves!`);
+  gameOver = true;
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+}
+
+initializeGame();
