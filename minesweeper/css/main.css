@@ -23,6 +23,7 @@ body {
   border-radius: 1rem;
   width: 50rem;
   height: 50rem;
+  cursor: url("../assets/images/boot.png"), auto;
 }
 @media screen and (max-width: 300px) {
   .minesweeper {

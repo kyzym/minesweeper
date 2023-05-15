@@ -11,7 +11,12 @@ let firstMoveMade = false;
 let gameOver = false;
 let intervalId = null;
 
-// Define data structures
+let movesEmoji = '👞';
+let timeEmoji = '⏱';
+let restartEmoji = '😊';
+const controlsContainer = document.createElement('div');
+controlsContainer.className = 'controls';
+
 const board = Array(SIZE)
   .fill()
   .map(() => Array(SIZE).fill(0));
@@ -24,7 +29,7 @@ const timeDisplay = createDiv('time-display');
 const movesDisplay = createDiv('moves-display');
 const restartButton = createButton(
   'restart-button',
-  'New game',
+  restartEmoji,
   initializeGame
 );
 
@@ -42,25 +47,30 @@ function createDiv(className) {
   return div;
 }
 
-function createButton(id, text, onClick) {
+function createButton(id, emoji, onClick) {
   const button = document.createElement('button');
   button.id = id;
-  button.textContent = text;
+  button.innerHTML = emoji;
   button.addEventListener('click', onClick);
   return button;
 }
 
 function updateTimeDisplay(time) {
-  timeDisplay.textContent = `Time: ${time} s`;
+  timeDisplay.innerHTML = `${timeEmoji} ${time}`;
 }
 
 function updateMovesDisplay(moves) {
-  movesDisplay.textContent = `Moves: ${moves}`;
+  movesDisplay.innerHTML = `${movesEmoji} ${moves}`;
 }
 
 function initializeGame() {
   resetGameVariables();
   clearGameBoard();
+
+  controlsContainer.appendChild(restartButton);
+  controlsContainer.appendChild(timeDisplay);
+  controlsContainer.appendChild(movesDisplay);
+  document.body.appendChild(controlsContainer);
 
   for (let i = 0; i < SIZE; i++) {
     for (let j = 0; j < SIZE; j++) {
@@ -69,6 +79,18 @@ function initializeGame() {
     }
   }
 }
+
+restartButton.addEventListener('mouseup', () => {
+  if (gameOver) {
+    restartButton.innerHTML = `😡`;
+  } else {
+    restartButton.innerHTML = restartEmoji;
+  }
+});
+
+restartButton.addEventListener('mousedown', () => {
+  restartButton.innerHTML = `😱`;
+});
 
 function resetGameVariables() {
   moves = 0;
@@ -137,13 +159,13 @@ function handleLeftClick(cell, cellContent, i, j) {
     return;
   }
 
-  // Place the mines after the first move
+  restartButton.innerHTML = `😱`;
+
   if (!firstMoveMade) {
     placeMines(i, j);
     firstMoveMade = true;
   }
 
-  // Start the timer after the first move
   if (!startTime) {
     startTimer();
   }
@@ -154,11 +176,17 @@ function handleLeftClick(cell, cellContent, i, j) {
   if (board[i][j] === 'M') {
     showMines();
     gameOver = true;
+    restartButton.innerHTML = `😡`;
     setTimeout(() => {
       alert(GAME_OVER_MSG);
     }, 100);
   } else {
     showNumber(cell, cellContent, i, j);
+    if (!gameOver) {
+      setTimeout(() => {
+        restartButton.innerHTML = restartEmoji;
+      }, 300);
+    }
     if (openedCells.size === SIZE * SIZE - MINES) {
       endGame();
     }
