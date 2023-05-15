@@ -11,38 +11,41 @@ body {
   background-color: $body-bg-color;
 }
 
+.game-container {
+  @include centerize;
+  flex-direction: column;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+}
+
 .minesweeper {
   display: grid;
   grid-template-columns: repeat($grid-size, 1fr);
-  gap: 0.5rem;
-  border: 1rem solid $border-color;
+  gap: 1%;
+  border: 0.5vw solid $border-color;
   padding: 1rem;
   background-color: $minesweeper-bg-color;
   border-radius: 1rem;
-  width: 50rem;
-  height: 50rem;
+  width: 40vw;
+  height: 40vw;
   cursor: url('../assets/images/boot.png'), auto;
+}
 
-  @include responsive(small) {
-    width: 30rem;
-    height: 30rem;
-  }
-
-  @include responsive(medium) {
-    width: 40rem;
-    height: 40rem;
-  }
-
-  @include responsive(large) {
-    width: 60rem;
-    height: 60rem;
-  }
+.control {
+  @include centerize;
+  font-weight: bold;
+  color: $border-color;
+  font-size: 3.5rem;
 }
 
 .cell {
   background-color: $cell-bg-color;
   @include centerize;
-  cursor: url('../assets/images/boot.png'), auto;
   user-select: none;
   border-radius: 0.15rem;
   box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.3);
@@ -78,4 +81,12 @@ body {
 .flag {
   background-image: url('../assets/images/flag-icon.png');
   background-size: cover;
+}
+
+.restart-button {
+  font-size: 1.5em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
 }

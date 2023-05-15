@@ -24,9 +24,10 @@ const mineLocations = new Set();
 const openedCells = new Set();
 const flaggedCells = new Set();
 
+const gameContainer = createDiv('game-container');
 const container = createDiv('minesweeper');
-const timeDisplay = createDiv('time-display');
-const movesDisplay = createDiv('moves-display');
+const timeDisplay = createDiv('time-display', 'control');
+const movesDisplay = createDiv('moves-display', 'control');
 const restartButton = createButton(
   'restart-button',
   restartEmoji,
@@ -36,20 +37,24 @@ const restartButton = createButton(
 updateTimeDisplay(0);
 updateMovesDisplay(0);
 
-document.body.appendChild(restartButton);
-document.body.appendChild(timeDisplay);
-document.body.appendChild(movesDisplay);
-document.body.appendChild(container);
+document.body.appendChild(gameContainer);
+gameContainer.appendChild(controlsContainer);
+gameContainer.appendChild(container);
 
-function createDiv(className) {
+controlsContainer.appendChild(timeDisplay);
+controlsContainer.appendChild(restartButton);
+controlsContainer.appendChild(movesDisplay);
+
+function createDiv(className, classNameSecond) {
   const div = document.createElement('div');
   div.classList.add(className);
+  classNameSecond && div.classList.add(classNameSecond);
   return div;
 }
 
-function createButton(id, emoji, onClick) {
+function createButton(className, emoji, onClick) {
   const button = document.createElement('button');
-  button.id = id;
+  button.className = className;
   button.innerHTML = emoji;
   button.addEventListener('click', onClick);
   return button;
@@ -66,11 +71,6 @@ function updateMovesDisplay(moves) {
 function initializeGame() {
   resetGameVariables();
   clearGameBoard();
-
-  controlsContainer.appendChild(restartButton);
-  controlsContainer.appendChild(timeDisplay);
-  controlsContainer.appendChild(movesDisplay);
-  document.body.appendChild(controlsContainer);
 
   for (let i = 0; i < SIZE; i++) {
     for (let j = 0; j < SIZE; j++) {
@@ -176,7 +176,7 @@ function handleLeftClick(cell, cellContent, i, j) {
   if (board[i][j] === 'M') {
     showMines();
     gameOver = true;
-    restartButton.innerHTML = `😡`;
+    restartButton.innerHTML = `💩`;
     setTimeout(() => {
       alert(GAME_OVER_MSG);
     }, 100);
@@ -185,7 +185,7 @@ function handleLeftClick(cell, cellContent, i, j) {
     if (!gameOver) {
       setTimeout(() => {
         restartButton.innerHTML = restartEmoji;
-      }, 300);
+      }, 200);
     }
     if (openedCells.size === SIZE * SIZE - MINES) {
       endGame();
