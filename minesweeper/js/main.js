@@ -1,6 +1,5 @@
 import { setColor } from './setColor.js';
 import { flagSound, loseSound, stepSound, winSound } from './sound.js';
-console.log({ flagSound, loseSound, stepSound, winSound });
 
 const SIZE = 10;
 const MINES = 10;
@@ -295,12 +294,29 @@ function endGame() {
   winSound.play();
   setTimeout(() => {
     alert(`${VICTORY_MSG}${timeTaken} seconds and ${moves} moves!`);
+    saveResult(timeTaken, moves);
   }, 500);
   gameOver = true;
   if (intervalId) {
     clearInterval(intervalId);
     intervalId = null;
   }
+}
+
+function saveResult(time, moves) {
+  const results = loadResults();
+  const newResult = { time, moves, date: new Date().toLocaleString('ru') };
+  results.push(newResult);
+
+  while (results.length > 10) {
+    results.shift();
+  }
+  localStorage.setItem('minesweeperResults', JSON.stringify(results));
+}
+
+function loadResults() {
+  const results = localStorage.getItem('minesweeperResults');
+  return results ? JSON.parse(results) : [];
 }
 
 initializeGame();
