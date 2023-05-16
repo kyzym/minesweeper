@@ -27,12 +27,12 @@ body {
   display: grid;
   grid-template-columns: repeat($grid-size, 1fr);
   gap: 1%;
-  border: 0.5vw solid $border-color;
+  border: 0.5vmin solid $border-color;
   padding: 1rem;
   background-color: $minesweeper-bg-color;
   border-radius: 1rem;
-  width: 40vw;
-  height: 40vw;
+  width: 55vmin;
+  height: 55vmin;
   cursor: url('../assets/images/boot.png'), auto;
 }
 
@@ -84,9 +84,22 @@ body {
 }
 
 .restart-button {
-  font-size: 1.5em;
+  @include centerize;
+  font-size: 5em;
   background: transparent;
   border: none;
   cursor: pointer;
   outline: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border-radius: 2rem;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.button-emoji {
+  height: 100%;
+  width: 100%;
 }

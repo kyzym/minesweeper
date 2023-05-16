@@ -1,4 +1,6 @@
 import { setColor } from './setColor.js';
+import { flagSound, loseSound, stepSound, winSound } from './sound.js';
+console.log({ flagSound, loseSound, stepSound, winSound });
 
 const SIZE = 10;
 const MINES = 10;
@@ -55,8 +57,11 @@ function createDiv(className, classNameSecond) {
 function createButton(className, emoji, onClick) {
   const button = document.createElement('button');
   button.className = className;
-  button.innerHTML = emoji;
+  const buttonContent = createDiv('button-emoji');
+  button.appendChild(buttonContent);
+  buttonContent.textContent = emoji;
   button.addEventListener('click', onClick);
+  button.buttonContent = buttonContent;
   return button;
 }
 
@@ -81,15 +86,7 @@ function initializeGame() {
 }
 
 restartButton.addEventListener('mouseup', () => {
-  if (gameOver) {
-    restartButton.innerHTML = `😡`;
-  } else {
-    restartButton.innerHTML = restartEmoji;
-  }
-});
-
-restartButton.addEventListener('mousedown', () => {
-  restartButton.innerHTML = `😱`;
+  restartButton.buttonContent.textContent = restartEmoji;
 });
 
 function resetGameVariables() {
@@ -137,6 +134,7 @@ function createGameCell(i, j) {
 
 function handleRightClick(cell, i, j, e) {
   e.preventDefault();
+  flagSound.play();
   if (gameOver || openedCells.has(`${i},${j}`)) {
     return;
   }
@@ -159,7 +157,7 @@ function handleLeftClick(cell, cellContent, i, j) {
     return;
   }
 
-  restartButton.innerHTML = `😱`;
+  restartButton.buttonContent.textContent = `😱`;
 
   if (!firstMoveMade) {
     placeMines(i, j);
@@ -176,15 +174,17 @@ function handleLeftClick(cell, cellContent, i, j) {
   if (board[i][j] === 'M') {
     showMines();
     gameOver = true;
-    restartButton.innerHTML = `💩`;
+    restartButton.buttonContent.textContent = `💩`;
     setTimeout(() => {
       alert(GAME_OVER_MSG);
     }, 100);
+    loseSound.play();
   } else {
+    stepSound.play();
     showNumber(cell, cellContent, i, j);
     if (!gameOver) {
       setTimeout(() => {
-        restartButton.innerHTML = restartEmoji;
+        restartButton.buttonContent.textContent = restartEmoji;
       }, 200);
     }
     if (openedCells.size === SIZE * SIZE - MINES) {
@@ -292,7 +292,10 @@ function openAdjacentCells(i, j) {
 function endGame() {
   const endTime = Date.now();
   const timeTaken = Math.round((endTime - startTime) / 1000);
-  alert(`${VICTORY_MSG}${timeTaken} seconds and ${moves} moves!`);
+  winSound.play();
+  setTimeout(() => {
+    alert(`${VICTORY_MSG}${timeTaken} seconds and ${moves} moves!`);
+  }, 500);
   gameOver = true;
   if (intervalId) {
     clearInterval(intervalId);
