@@ -1,10 +1,13 @@
+import { loadGameState } from './loadGameState.js';
+import { saveGameState } from './saveGameState.js';
 import { setColor } from './setColor.js';
-import { flagSound, loseSound, stepSound, winSound } from './sound.js';
+import { showNumber } from './showNumber.js';
+import { flagSound, loseSound, stepSound } from './sound.js';
+import { winGame } from './winGame.js';
 
 const SIZE = 10;
 const MINES = 10;
 const GAME_OVER_MSG = 'Game over. Try again';
-const VICTORY_MSG = 'Hooray! You found all mines in ';
 
 let moves = 0;
 let startTime;
@@ -18,12 +21,12 @@ let restartEmoji = '😊';
 const controlsContainer = document.createElement('div');
 controlsContainer.className = 'controls';
 
-const board = Array(SIZE)
+export let board = Array(SIZE)
   .fill()
   .map(() => Array(SIZE).fill(0));
-const mineLocations = new Set();
-const openedCells = new Set();
-const flaggedCells = new Set();
+let mineLocations = new Set();
+export let openedCells = new Set();
+let flaggedCells = new Set();
 
 const gameContainer = createDiv('game-container');
 const container = createDiv('minesweeper');
@@ -82,10 +85,46 @@ function initializeGame() {
       container.appendChild(cell);
     }
   }
+
+  const loadedState = loadGameState(
+    container,
+    SIZE,
+    updateTimeDisplay,
+    updateMovesDisplay,
+    startTimer
+  );
+  if (loadedState) {
+    ({
+      moves,
+      startTime,
+      firstMoveMade,
+      gameOver,
+      board,
+      mineLocations,
+      openedCells,
+      flaggedCells,
+    } = loadedState);
+  }
+
+  openedCells.forEach((cell) => {
+    const [i, j] = cell.split(',').map(Number);
+    const cellElement = container.children[i * SIZE + j];
+    const cellContent = cellElement.children[0];
+
+    cellElement.classList.remove('cell');
+    cellElement.classList.add('number');
+    cellContent.textContent = board[i][j];
+    setColor(cellContent, board[i][j].toString());
+
+    if (board[i][j] === '0') {
+      openAdjacentCells(i, j);
+    }
+  });
 }
 
 restartButton.addEventListener('mouseup', () => {
   restartButton.buttonContent.textContent = restartEmoji;
+  localStorage.removeItem('minesweeperGameState');
 });
 
 function resetGameVariables() {
@@ -145,6 +184,17 @@ function handleRightClick(cell, i, j, e) {
     flaggedCells.add(`${i},${j}`);
     cell.classList.add('flag');
   }
+
+  saveGameState(
+    moves,
+    startTime,
+    firstMoveMade,
+    gameOver,
+    board,
+    mineLocations,
+    openedCells,
+    flaggedCells
+  );
 }
 
 function handleLeftClick(cell, cellContent, i, j) {
@@ -177,9 +227,11 @@ function handleLeftClick(cell, cellContent, i, j) {
     setTimeout(() => {
       alert(GAME_OVER_MSG);
     }, 100);
+
     loseSound.play();
   } else {
     stepSound.play();
+
     showNumber(cell, cellContent, i, j);
     if (!gameOver) {
       setTimeout(() => {
@@ -187,9 +239,20 @@ function handleLeftClick(cell, cellContent, i, j) {
       }, 200);
     }
     if (openedCells.size === SIZE * SIZE - MINES) {
-      endGame();
+      winGame(startTime, moves, gameOver, intervalId);
     }
   }
+
+  saveGameState(
+    moves,
+    startTime,
+    firstMoveMade,
+    gameOver,
+    board,
+    mineLocations,
+    openedCells,
+    flaggedCells
+  );
 }
 
 function placeMines(i, j) {
@@ -235,12 +298,14 @@ function calculateNumbers() {
 }
 
 function startTimer() {
-  startTime = Date.now();
+  if (!startTime) {
+    startTime = new Date();
+  }
   intervalId = setInterval(() => {
     if (gameOver) {
       clearInterval(intervalId);
     } else {
-      const currentTime = Math.floor((Date.now() - startTime) / 1000);
+      const currentTime = Math.floor((Date.now() - startTime.getTime()) / 1000);
       updateTimeDisplay(currentTime);
     }
   }, 1000);
@@ -256,20 +321,7 @@ function showMines() {
   }
 }
 
-function showNumber(cell, cellContent, i, j) {
-  cell.classList.remove('cell');
-  cell.classList.add('number');
-
-  cellContent.textContent = board[i][j];
-  setColor(cellContent, board[i][j].toString());
-  openedCells.add(`${i},${j}`);
-
-  if (board[i][j] === '0') {
-    openAdjacentCells(i, j);
-  }
-}
-
-function openAdjacentCells(i, j) {
+export function openAdjacentCells(i, j) {
   for (let dx = Math.max(i - 1, 0); dx <= Math.min(i + 1, SIZE - 1); dx++) {
     for (let dy = Math.max(j - 1, 0); dy <= Math.min(j + 1, SIZE - 1); dy++) {
       if (!openedCells.has(`${dx},${dy}`) && board[dx][dy] !== 'M') {
@@ -286,37 +338,6 @@ function openAdjacentCells(i, j) {
       }
     }
   }
-}
-
-function endGame() {
-  const endTime = Date.now();
-  const timeTaken = Math.round((endTime - startTime) / 1000);
-  winSound.play();
-  setTimeout(() => {
-    alert(`${VICTORY_MSG}${timeTaken} seconds and ${moves} moves!`);
-    saveResult(timeTaken, moves);
-  }, 500);
-  gameOver = true;
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
-  }
-}
-
-function saveResult(time, moves) {
-  const results = loadResults();
-  const newResult = { time, moves, date: new Date().toLocaleString('ru') };
-  results.push(newResult);
-
-  while (results.length > 10) {
-    results.shift();
-  }
-  localStorage.setItem('minesweeperResults', JSON.stringify(results));
-}
-
-function loadResults() {
-  const results = localStorage.getItem('minesweeperResults');
-  return results ? JSON.parse(results) : [];
 }
 
 initializeGame();
