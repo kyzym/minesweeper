@@ -48,7 +48,7 @@ body.dark {
   border-radius: 1rem;
   width: 65vmin;
   height: 65vmin;
-  cursor: url("../assets/images/boot.png"), auto;
+  cursor: url("../assets/images/bootSmall.png"), auto;
 }
 
 .control {
@@ -67,7 +67,7 @@ body.dark {
 }
 
 .cell {
-  background-color: #8fbc8f;
+  background-color: #95da41;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,6 +87,7 @@ body.dark {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0.25rem;
 }
 
 .mine {
@@ -102,6 +103,7 @@ body.dark {
 .cell-content {
   font-size: 200%;
   position: absolute;
+  font-weight: 500;
 }
 
 .flag {
@@ -137,9 +139,49 @@ body.dark {
   justify-content: space-between;
   margin-bottom: 5vmin;
 }
+.difficulty-container select {
+  margin-right: 4vmin;
+}
+.difficulty-container button {
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  font-size: 3em;
+}
+.difficulty-container button:hover {
+  border-color: #0d0d0d;
+  box-shadow: 0 0 0.5rem rgba(51, 51, 51, 0.5);
+}
+.difficulty-container button:focus {
+  outline: none;
+  border-color: black;
+  box-shadow: 0 0 0.7rem rgba(51, 51, 51, 0.7);
+}
+.difficulty-container button:disabled {
+  box-shadow: none;
+}
 
 .theme-container {
   display: flex;
+  margin-left: auto;
+  gap: 1vmin;
+}
+.theme-container button {
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  font-size: 2.5rem;
+}
+.theme-container button:hover {
+  border-color: #0d0d0d;
+  box-shadow: 0 0 0.5rem rgba(51, 51, 51, 0.5);
+}
+.theme-container button:focus {
+  outline: none;
+  border-color: black;
+  box-shadow: 0 0 0.7rem rgba(51, 51, 51, 0.7);
 }
 
 .difficulty-select,
@@ -167,8 +209,7 @@ body.dark {
 }
 .difficulty-select:disabled,
 .mines-input:disabled {
-  background-color: white;
-  color: rgba(0, 0, 0, 0.301);
+  box-shadow: none;
 }
 
 .mines-input {

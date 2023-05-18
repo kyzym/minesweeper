@@ -83,7 +83,6 @@ controlsContainer.appendChild(restartButton);
 controlsContainer.appendChild(movesDisplay);
 
 const themeContainer = createDiv('theme-container');
-difficultyContainer.appendChild(themeContainer);
 
 function switchTheme(e) {
   const theme = e.currentTarget.className.split('-')[0];
@@ -102,6 +101,8 @@ const decrementButton = createButton('decrement-button', '-', decrementInput);
 difficultyContainer.appendChild(decrementButton);
 difficultyContainer.appendChild(minesInput);
 difficultyContainer.appendChild(incrementButton);
+
+difficultyContainer.appendChild(themeContainer);
 
 function incrementInput() {
   if (minesInput.value < minesInput.max) {
@@ -171,6 +172,8 @@ function initializeGame() {
     if (startTime && !gameOver) {
       difficultySelect.disabled = true;
       minesInput.disabled = true;
+      // incrementButton.disabled = true;
+      // decrementButton.disabled = true;
 
       updateTimeDisplay(Math.floor((Date.now() - startTime.getTime()) / 1000));
       startTimer();
@@ -200,6 +203,8 @@ restartButton.addEventListener('mouseup', () => {
 
   difficultySelect.disabled = false;
   minesInput.disabled = false;
+  incrementButton.disabled = true;
+  decrementButton.disabled = true;
 });
 
 function resetGameVariables() {
@@ -207,7 +212,7 @@ function resetGameVariables() {
   startTime = null;
   firstMoveMade = false;
   gameOver = false;
-
+  restartButton.buttonContent.style.height = '100%';
   if (intervalId) {
     clearInterval(intervalId);
     intervalId = null;
@@ -251,7 +256,7 @@ function handleRightClick(cell, i, j, e) {
     difficulty
   );
 }
-
+// console.dir();
 function handleLeftClick(cell, cellContent, i, j) {
   if (
     gameOver ||
@@ -269,6 +274,8 @@ function handleLeftClick(cell, cellContent, i, j) {
 
     difficultySelect.disabled = true;
     minesInput.disabled = true;
+    incrementButton.disabled = true;
+    decrementButton.disabled = true;
   }
 
   if (!startTime) {
@@ -281,7 +288,9 @@ function handleLeftClick(cell, cellContent, i, j) {
   if (board[i][j] === 'M') {
     showMines(mineLocations, fieldSize, container);
     gameOver = true;
+    restartButton.buttonContent.style.height = '130%';
     restartButton.buttonContent.textContent = `💩`;
+
     setTimeout(() => {
       alert('Game over. Try again');
     }, 100);

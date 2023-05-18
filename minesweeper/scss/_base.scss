@@ -52,12 +52,13 @@ body.dark {
   gap: 0.5%;
   border: 0.5vmin solid $border-color;
   padding: 1rem;
-  // background-color: $minesweeper-bg-color;
+
   background-color: transparent;
   border-radius: 1rem;
   width: 65vmin;
   height: 65vmin;
-  cursor: url('../assets/images/boot.png'), auto;
+
+  cursor: url('../assets/images/bootSmall.png'), auto;
 }
 
 .control {
@@ -91,6 +92,7 @@ body.dark {
   width: 100%;
   height: 100%;
   @include centerize;
+  border-radius: 0.25rem;
 }
 
 .mine {
@@ -106,6 +108,7 @@ body.dark {
 .cell-content {
   font-size: 200%;
   position: absolute;
+  font-weight: 500;
 }
 
 .flag {
@@ -139,9 +142,56 @@ body.dark {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 5vmin;
+
+  & select {
+    margin-right: 4vmin;
+  }
+
+  & button {
+    border: 1px solid $border-color;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-size: 3em;
+
+    &:hover {
+      border-color: darken($border-color, 15%);
+      box-shadow: 0 0 0.5rem rgba($border-color, 0.5);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: darken($border-color, 30%);
+      box-shadow: 0 0 0.7rem rgba($border-color, 0.7);
+    }
+
+    &:disabled {
+      box-shadow: none;
+    }
+  }
 }
 .theme-container {
   display: flex;
+  margin-left: auto;
+  gap: 1vmin;
+  & button {
+    border: 1px solid $border-color;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    font-size: 2.5rem;
+
+    &:hover {
+      border-color: darken($border-color, 15%);
+      box-shadow: 0 0 0.5rem rgba($border-color, 0.5);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: darken($border-color, 30%);
+      box-shadow: 0 0 0.7rem rgba($border-color, 0.7);
+    }
+  }
 }
 
 .difficulty-select,
@@ -167,14 +217,12 @@ body.dark {
     box-shadow: 0 0 0.7rem rgba($border-color, 0.7);
   }
   &:disabled {
-    background-color: white;
-    color: rgba(0, 0, 0, 0.301);
+    box-shadow: none;
   }
 }
 
 .mines-input {
   width: 4rem;
-  // margin-right: auto;
 }
 
 input[type='number']::-webkit-inner-spin-button,
