@@ -1,6 +1,5 @@
 import { createButton } from './createElements/createButton.js';
 import { createDiv } from './createElements/createDiv.js';
-import { loadGameState } from './loadGameState.js';
 import { saveGameState } from './saveGameState.js';
 import { setColor } from './setColor.js';
 import { showNumber } from './showNumber.js';
@@ -75,6 +74,20 @@ gameContainer.appendChild(container);
 controlsContainer.appendChild(timeDisplay);
 controlsContainer.appendChild(restartButton);
 controlsContainer.appendChild(movesDisplay);
+
+const themeContainer = createDiv('theme-container');
+controls.appendChild(themeContainer);
+
+function switchTheme(e) {
+  const theme = e.currentTarget.className.split('-')[0];
+  document.body.className = theme;
+  localStorage.setItem('theme', theme);
+}
+const lightThemeButton = createButton('light-theme-button', '🌞', switchTheme);
+const darkThemeButton = createButton('dark-theme-button', '🌚', switchTheme);
+
+themeContainer.appendChild(lightThemeButton);
+themeContainer.appendChild(darkThemeButton);
 
 function updateTimeDisplay(time) {
   timeDisplay.innerHTML = `${timeEmoji} ${time}`;
@@ -160,10 +173,6 @@ restartButton.addEventListener('mouseup', () => {
   difficultySelect.disabled = false;
   minesInput.disabled = false;
 });
-
-setInterval(() => {
-  console.log(firstMoveMade, gameOver);
-}, 1000);
 
 function resetGameVariables() {
   moves = 0;
@@ -448,6 +457,11 @@ function updateDifficulty() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.body.className = savedTheme;
+  }
+
   initializeGame();
 });
 

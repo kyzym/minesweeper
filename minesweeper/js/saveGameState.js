@@ -9,7 +9,8 @@ export function saveGameState(
   mineLocations,
   openedCells,
   flaggedCells,
-  difficulty
+  difficulty,
+  theme
 ) {
   let gameState = {
     fieldSize,
@@ -23,6 +24,7 @@ export function saveGameState(
     openedCells: Array.from(openedCells),
     flaggedCells: Array.from(flaggedCells),
     difficulty,
+    theme,
   };
 
   localStorage.setItem('minesweeperGameState', JSON.stringify(gameState));

@@ -16,6 +16,23 @@ body {
   );
 }
 
+body.light {
+  background: rgb(238, 174, 202);
+  background: radial-gradient(
+    circle,
+    rgba(238, 174, 202, 1) 0%,
+    rgba(148, 187, 233, 1) 100%
+  );
+}
+body.dark {
+  background: rgb(63, 94, 251);
+  background: radial-gradient(
+    circle,
+    rgba(63, 94, 251, 1) 0%,
+    rgba(252, 70, 107, 1) 100%
+  );
+}
+
 .game-container {
   @include centerize;
   flex-direction: column;
@@ -86,7 +103,6 @@ body {
 }
 
 .cell-content {
-  // font-size: $cell-content-font-size;
   font-size: 200%;
   position: absolute;
 }
@@ -123,7 +139,7 @@ body {
   padding: 1rem;
   margin: 0 0.5rem;
   border: 1px solid $border-color;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
   background-color: $minesweeper-bg-color;
   color: $border-color;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
