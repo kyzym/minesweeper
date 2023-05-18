@@ -172,8 +172,6 @@ function initializeGame() {
     if (startTime && !gameOver) {
       difficultySelect.disabled = true;
       minesInput.disabled = true;
-      // incrementButton.disabled = true;
-      // decrementButton.disabled = true;
 
       updateTimeDisplay(Math.floor((Date.now() - startTime.getTime()) / 1000));
       startTimer();
@@ -203,8 +201,8 @@ restartButton.addEventListener('mouseup', () => {
 
   difficultySelect.disabled = false;
   minesInput.disabled = false;
-  incrementButton.disabled = true;
-  decrementButton.disabled = true;
+  incrementButton.disabled = false;
+  decrementButton.disabled = false;
 });
 
 function resetGameVariables() {
@@ -256,7 +254,7 @@ function handleRightClick(cell, i, j, e) {
     difficulty
   );
 }
-// console.dir();
+
 function handleLeftClick(cell, cellContent, i, j) {
   if (
     gameOver ||
