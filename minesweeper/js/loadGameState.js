@@ -4,8 +4,7 @@ export function loadGameState(
   container,
   fieldSize,
   updateTimeDisplay,
-  updateMovesDisplay,
-  startTimer
+  updateMovesDisplay
 ) {
   let gameState = localStorage.getItem('minesweeperGameState');
 
@@ -35,10 +34,6 @@ export function loadGameState(
       openedCells: new Set(savedOpenedCells),
       flaggedCells: new Set(savedFlaggedCells),
     };
-
-    if (!state.gameOver) {
-      startTimer();
-    }
 
     updateTimeDisplay(
       Math.floor((Date.now() - state.startTime.getTime()) / 1000)

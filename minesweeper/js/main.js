@@ -80,13 +80,23 @@ function updateMovesDisplay(moves) {
   movesDisplay.innerHTML = `${movesEmoji} ${moves}`;
 }
 
+function restoreDifficultyAndMines() {
+  difficultySelect.value = difficulty;
+  minesInput.value = mines;
+}
+
 function initializeGame() {
   let loadedState = localStorage.getItem('minesweeperGameState');
   if (loadedState) {
     loadedState = JSON.parse(loadedState);
     fieldSize = loadedState.fieldSize;
     mines = loadedState.mines;
+    difficulty = loadedState.difficulty;
   }
+  restoreDifficultyAndMines();
+
+  difficultySelect.disabled = firstMoveMade && !gameOver;
+  minesInput.disabled = firstMoveMade && !gameOver;
 
   resetGameVariables();
   clearGameBoard();
@@ -112,13 +122,15 @@ function initializeGame() {
       flaggedCells,
     } = loadedState);
 
-    if (startTime) {
-      startTimer();
-    }
     startTime = loadedState.startTime ? new Date(startTime) : null;
     openedCells = new Set(loadedState.openedCells);
     mineLocations = new Set(loadedState.mineLocations);
     flaggedCells = new Set(loadedState.flaggedCells);
+    if (startTime && !gameOver) {
+      updateTimeDisplay(Math.floor((Date.now() - startTime.getTime()) / 1000));
+      startTimer();
+    }
+    updateMovesDisplay(moves);
   }
 
   openedCells.forEach((cell) => {
@@ -222,6 +234,11 @@ function handleLeftClick(cell, cellContent, i, j) {
     openedCells.has(`${i},${j}`)
   ) {
     return;
+  }
+
+  if (gameOver) {
+    difficultySelect.disabled = false;
+    minesInput.disabled = false;
   }
 
   restartButton.buttonContent.textContent = `😱`;
@@ -408,6 +425,9 @@ function updateDifficulty() {
     flaggedCells,
     difficulty
   );
+
+  difficultySelect.disabled = true;
+  minesInput.disabled = true;
 
   initializeGame();
 }

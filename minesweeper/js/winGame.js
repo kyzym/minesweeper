@@ -15,4 +15,6 @@ export function winGame(startTime, moves, gameOver, intervalId) {
     clearInterval(intervalId);
     intervalId = null;
   }
+  difficultySelect.disabled = false;
+  minesInput.disabled = false;
 }
