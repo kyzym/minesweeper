@@ -95,9 +95,6 @@ function initializeGame() {
   }
   restoreDifficultyAndMines();
 
-  difficultySelect.disabled = firstMoveMade && !gameOver;
-  minesInput.disabled = firstMoveMade && !gameOver;
-
   resetGameVariables();
   clearGameBoard();
   container.style.gridTemplateColumns = `repeat(${fieldSize}, 1fr)`;
@@ -127,6 +124,9 @@ function initializeGame() {
     mineLocations = new Set(loadedState.mineLocations);
     flaggedCells = new Set(loadedState.flaggedCells);
     if (startTime && !gameOver) {
+      difficultySelect.disabled = true;
+      minesInput.disabled = true;
+
       updateTimeDisplay(Math.floor((Date.now() - startTime.getTime()) / 1000));
       startTimer();
     }
@@ -152,7 +152,14 @@ function initializeGame() {
 restartButton.addEventListener('mouseup', () => {
   restartButton.buttonContent.textContent = restartEmoji;
   localStorage.removeItem('minesweeperGameState');
+
+  difficultySelect.disabled = false;
+  minesInput.disabled = false;
 });
+
+setInterval(() => {
+  console.log(firstMoveMade, gameOver);
+}, 1000);
 
 function resetGameVariables() {
   moves = 0;
@@ -236,16 +243,14 @@ function handleLeftClick(cell, cellContent, i, j) {
     return;
   }
 
-  if (gameOver) {
-    difficultySelect.disabled = false;
-    minesInput.disabled = false;
-  }
-
   restartButton.buttonContent.textContent = `😱`;
 
   if (!firstMoveMade) {
     placeMines(i, j);
     firstMoveMade = true;
+
+    difficultySelect.disabled = true;
+    minesInput.disabled = true;
   }
 
   if (!startTime) {
@@ -274,7 +279,14 @@ function handleLeftClick(cell, cellContent, i, j) {
       }, 200);
     }
     if (openedCells.size === fieldSize * fieldSize - mines) {
-      winGame(startTime, moves, gameOver, intervalId);
+      winGame(
+        startTime,
+        moves,
+        gameOver,
+        intervalId,
+        difficultySelect,
+        minesInput
+      );
     }
   }
 
@@ -388,6 +400,8 @@ export function openAdjacentCells(i, j) {
 
 function updateDifficulty() {
   localStorage.removeItem('minesweeperGameState');
+  resetGameVariables();
+  clearGameBoard();
 
   difficulty = difficultySelect.value;
 
@@ -425,9 +439,6 @@ function updateDifficulty() {
     flaggedCells,
     difficulty
   );
-
-  difficultySelect.disabled = true;
-  minesInput.disabled = true;
 
   initializeGame();
 }

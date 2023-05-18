@@ -1,7 +1,14 @@
 import { saveResult } from './results/saveResults.js';
 import { winSound } from './sound.js';
 
-export function winGame(startTime, moves, gameOver, intervalId) {
+export function winGame(
+  startTime,
+  moves,
+  gameOver,
+  intervalId,
+  difficultySelect,
+  minesInput
+) {
   const VICTORY_MSG = 'Hooray! You found all mines in ';
   const endTime = Date.now();
   const timeTaken = Math.round((endTime - startTime) / 1000);
