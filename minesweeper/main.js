@@ -1,10 +1,14 @@
-import { createButton } from './createElements/createButton.js';
-import { createDiv } from './createElements/createDiv.js';
-import { saveGameState } from './saveGameState.js';
-import { setColor } from './setColor.js';
-import { showNumber } from './showNumber.js';
-import { flagSound, loseSound, stepSound } from './sound.js';
-import { winGame } from './winGame.js';
+import { calculateNumbers } from './js/calculateNumbers.js';
+import { createButton } from './js/createElements/createButton.js';
+import { createDiv } from './js/createElements/createDiv.js';
+import { createGameCell } from './js/createElements/createGameCell.js';
+import { clearGameBoard } from './js/helpers.js';
+import { saveGameState } from './js/saveGameState.js';
+import { setColor } from './js/setColor.js';
+import { showMines } from './js/showMines.js';
+import { showNumber } from './js/showNumber.js';
+import { flagSound, loseSound, stepSound } from './js/sound.js';
+import { winGame } from './js/winGame.js';
 
 let fieldSize = 10;
 let mines = 10;
@@ -37,11 +41,14 @@ minesInput.className = 'mines-input';
 difficultyContainer.appendChild(difficultySelect);
 difficultyContainer.appendChild(minesInput);
 
-difficultySelect.innerHTML = `
+difficultySelect.insertAdjacentHTML(
+  'beforeend',
+  `
   <option value="easy">Easy (10x10)</option>
   <option value="medium">Medium (15x15)</option>
   <option value="hard">Hard (25x25)</option>
-`;
+`
+);
 
 minesInput.type = 'number';
 minesInput.min = 10;
@@ -76,7 +83,7 @@ controlsContainer.appendChild(restartButton);
 controlsContainer.appendChild(movesDisplay);
 
 const themeContainer = createDiv('theme-container');
-controls.appendChild(themeContainer);
+difficultyContainer.appendChild(themeContainer);
 
 function switchTheme(e) {
   const theme = e.currentTarget.className.split('-')[0];
@@ -88,6 +95,27 @@ const darkThemeButton = createButton('dark-theme-button', '🌚', switchTheme);
 
 themeContainer.appendChild(lightThemeButton);
 themeContainer.appendChild(darkThemeButton);
+
+const incrementButton = createButton('increment-button', '+', incrementInput);
+const decrementButton = createButton('decrement-button', '-', decrementInput);
+
+difficultyContainer.appendChild(decrementButton);
+difficultyContainer.appendChild(minesInput);
+difficultyContainer.appendChild(incrementButton);
+
+function incrementInput() {
+  if (minesInput.value < minesInput.max) {
+    minesInput.value++;
+    updateDifficulty();
+  }
+}
+
+function decrementInput() {
+  if (minesInput.value > minesInput.min) {
+    minesInput.value--;
+    updateDifficulty();
+  }
+}
 
 function updateTimeDisplay(time) {
   timeDisplay.innerHTML = `${timeEmoji} ${time}`;
@@ -113,12 +141,12 @@ function initializeGame() {
   restoreDifficultyAndMines();
 
   resetGameVariables();
-  clearGameBoard();
+  clearGameBoard(container);
   container.style.gridTemplateColumns = `repeat(${fieldSize}, 1fr)`;
 
   for (let i = 0; i < fieldSize; i++) {
     for (let j = 0; j < fieldSize; j++) {
-      const cell = createGameCell(i, j);
+      const cell = createGameCell(i, j, handleLeftClick, handleRightClick);
       container.appendChild(cell);
     }
   }
@@ -194,29 +222,6 @@ function resetGameVariables() {
   updateMovesDisplay(0);
 }
 
-function clearGameBoard() {
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
-  }
-}
-
-function createGameCell(i, j) {
-  const cell = document.createElement('div');
-  const cellContent = document.createElement('span');
-
-  cell.classList.add('cell');
-  cellContent.classList.add('cell-content');
-  cell.appendChild(cellContent);
-
-  cell.addEventListener('contextmenu', handleRightClick.bind(null, cell, i, j));
-  cell.addEventListener(
-    'click',
-    handleLeftClick.bind(null, cell, cellContent, i, j)
-  );
-
-  return cell;
-}
-
 function handleRightClick(cell, i, j, e) {
   e.preventDefault();
   flagSound.play();
@@ -274,7 +279,7 @@ function handleLeftClick(cell, cellContent, i, j) {
   updateMovesDisplay(moves);
 
   if (board[i][j] === 'M') {
-    showMines();
+    showMines(mineLocations, fieldSize, container);
     gameOver = true;
     restartButton.buttonContent.textContent = `💩`;
     setTimeout(() => {
@@ -329,35 +334,7 @@ function placeMines(i, j) {
     }
   }
 
-  calculateNumbers();
-}
-
-function calculateNumbers() {
-  for (let x = 0; x < fieldSize; x++) {
-    for (let y = 0; y < fieldSize; y++) {
-      if (board[x][y] !== 'M') {
-        let mines = 0;
-
-        for (
-          let dx = Math.max(x - 1, 0);
-          dx <= Math.min(x + 1, fieldSize - 1);
-          dx++
-        ) {
-          for (
-            let dy = Math.max(y - 1, 0);
-            dy <= Math.min(y + 1, fieldSize - 1);
-            dy++
-          ) {
-            if (board[dx][dy] === 'M') {
-              mines++;
-            }
-          }
-        }
-
-        board[x][y] = mines || '0';
-      }
-    }
-  }
+  calculateNumbers(fieldSize, board);
 }
 
 function startTimer() {
@@ -372,16 +349,6 @@ function startTimer() {
       updateTimeDisplay(currentTime);
     }
   }, 1000);
-}
-
-function showMines() {
-  for (const mineLocation of mineLocations) {
-    const [mineX, mineY] = mineLocation.split(',').map(Number);
-    const mineCell = container.children[mineX * fieldSize + mineY];
-    mineCell.classList.remove('cell');
-    mineCell.classList.add('mine');
-    mineCell.children[0].textContent = 'M';
-  }
 }
 
 export function openAdjacentCells(i, j) {
@@ -414,7 +381,7 @@ export function openAdjacentCells(i, j) {
 function updateDifficulty() {
   localStorage.removeItem('minesweeperGameState');
   resetGameVariables();
-  clearGameBoard();
+  clearGameBoard(container);
 
   difficulty = difficultySelect.value;
 

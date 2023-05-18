@@ -52,7 +52,8 @@ body.dark {
   gap: 0.5%;
   border: 0.5vmin solid $border-color;
   padding: 1rem;
-  background-color: $minesweeper-bg-color;
+  // background-color: $minesweeper-bg-color;
+  background-color: transparent;
   border-radius: 1rem;
   width: 65vmin;
   height: 65vmin;
@@ -133,6 +134,16 @@ body.dark {
   width: 100%;
 }
 
+.difficulty-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5vmin;
+}
+.theme-container {
+  display: flex;
+}
+
 .difficulty-select,
 .mines-input {
   font-size: 1.5rem;
@@ -140,9 +151,11 @@ body.dark {
   margin: 0 0.5rem;
   border: 1px solid $border-color;
   border-radius: 0.5rem;
-  background-color: $minesweeper-bg-color;
+  background-color: transparent;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   color: $border-color;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
   &:hover {
     border-color: darken($border-color, 15%);
     box-shadow: 0 0 0.5rem rgba($border-color, 0.5);
@@ -161,4 +174,15 @@ body.dark {
 
 .mines-input {
   width: 4rem;
+  // margin-right: auto;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }

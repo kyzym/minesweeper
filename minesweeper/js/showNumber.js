@@ -1,4 +1,4 @@
-import { board, openAdjacentCells, openedCells } from './main.js';
+import { board, openAdjacentCells, openedCells } from '../main.js';
 import { setColor } from './setColor.js';
 
 export function showNumber(cell, cellContent, i, j) {

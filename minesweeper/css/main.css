@@ -44,7 +44,7 @@ body.dark {
   gap: 0.5%;
   border: 0.5vmin solid #333;
   padding: 1rem;
-  background-color: #eee8aa;
+  background-color: transparent;
   border-radius: 1rem;
   width: 65vmin;
   height: 65vmin;
@@ -131,6 +131,17 @@ body.dark {
   width: 100%;
 }
 
+.difficulty-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5vmin;
+}
+
+.theme-container {
+  display: flex;
+}
+
 .difficulty-select,
 .mines-input {
   font-size: 1.5rem;
@@ -138,7 +149,8 @@ body.dark {
   margin: 0 0.5rem;
   border: 1px solid #333;
   border-radius: 0.5rem;
-  background-color: #eee8aa;
+  background-color: transparent;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   color: #333;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -161,6 +173,16 @@ body.dark {
 
 .mines-input {
   width: 4rem;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /*# sourceMappingURL=main.css.map */
