@@ -1,3 +1,5 @@
+import { createButton } from './createElements/createButton.js';
+import { createDiv } from './createElements/createDiv.js';
 import { loadGameState } from './loadGameState.js';
 import { saveGameState } from './saveGameState.js';
 import { setColor } from './setColor.js';
@@ -5,25 +7,49 @@ import { showNumber } from './showNumber.js';
 import { flagSound, loseSound, stepSound } from './sound.js';
 import { winGame } from './winGame.js';
 
-const SIZE = 10;
-const MINES = 10;
-const GAME_OVER_MSG = 'Game over. Try again';
+let fieldSize = 10;
+let mines = 10;
 
 let moves = 0;
 let startTime;
 let firstMoveMade = false;
 let gameOver = false;
 let intervalId = null;
-
+let difficulty = 'easy';
 let movesEmoji = '👞';
 let timeEmoji = '⏱';
 let restartEmoji = '😊';
+
+const EASY = { size: 10 };
+const MEDIUM = { size: 15 };
+const HARD = { size: 25 };
+
 const controlsContainer = document.createElement('div');
 controlsContainer.className = 'controls';
 
-export let board = Array(SIZE)
+const difficultySelect = document.createElement('select');
+const minesInput = document.createElement('input');
+
+difficultySelect.className = 'difficulty-select';
+minesInput.className = 'mines-input';
+
+difficultySelect.innerHTML = `
+  <option value="easy">Easy (10x10)</option>
+  <option value="medium">Medium (15x15)</option>
+  <option value="hard">Hard (25x25)</option>
+`;
+
+minesInput.type = 'number';
+minesInput.min = 10;
+minesInput.max = 99;
+minesInput.value = mines;
+
+controlsContainer.appendChild(difficultySelect);
+controlsContainer.appendChild(minesInput);
+
+export let board = Array(fieldSize)
   .fill()
-  .map(() => Array(SIZE).fill(0));
+  .map(() => Array(fieldSize).fill(0));
 let mineLocations = new Set();
 export let openedCells = new Set();
 let flaggedCells = new Set();
@@ -38,9 +64,6 @@ const restartButton = createButton(
   initializeGame
 );
 
-updateTimeDisplay(0);
-updateMovesDisplay(0);
-
 document.body.appendChild(gameContainer);
 gameContainer.appendChild(controlsContainer);
 gameContainer.appendChild(container);
@@ -48,24 +71,6 @@ gameContainer.appendChild(container);
 controlsContainer.appendChild(timeDisplay);
 controlsContainer.appendChild(restartButton);
 controlsContainer.appendChild(movesDisplay);
-
-function createDiv(className, classNameSecond) {
-  const div = document.createElement('div');
-  div.classList.add(className);
-  classNameSecond && div.classList.add(classNameSecond);
-  return div;
-}
-
-function createButton(className, emoji, onClick) {
-  const button = document.createElement('button');
-  button.className = className;
-  const buttonContent = createDiv('button-emoji');
-  button.appendChild(buttonContent);
-  buttonContent.textContent = emoji;
-  button.addEventListener('click', onClick);
-  button.buttonContent = buttonContent;
-  return button;
-}
 
 function updateTimeDisplay(time) {
   timeDisplay.innerHTML = `${timeEmoji} ${time}`;
@@ -76,39 +81,50 @@ function updateMovesDisplay(moves) {
 }
 
 function initializeGame() {
+  let loadedState = localStorage.getItem('minesweeperGameState');
+  if (loadedState) {
+    loadedState = JSON.parse(loadedState);
+    fieldSize = loadedState.fieldSize;
+    mines = loadedState.mines;
+  }
+
   resetGameVariables();
   clearGameBoard();
+  container.style.gridTemplateColumns = `repeat(${fieldSize}, 1fr)`;
 
-  for (let i = 0; i < SIZE; i++) {
-    for (let j = 0; j < SIZE; j++) {
+  for (let i = 0; i < fieldSize; i++) {
+    for (let j = 0; j < fieldSize; j++) {
       const cell = createGameCell(i, j);
       container.appendChild(cell);
     }
   }
 
-  const loadedState = loadGameState(
-    container,
-    SIZE,
-    updateTimeDisplay,
-    updateMovesDisplay,
-    startTimer
-  );
   if (loadedState) {
     ({
+      fieldSize,
+      mines,
       moves,
       startTime,
       firstMoveMade,
       gameOver,
       board,
       mineLocations,
-      openedCells,
       flaggedCells,
     } = loadedState);
+
+    if (startTime) {
+      startTimer();
+    }
+    startTime = loadedState.startTime ? new Date(startTime) : null;
+    openedCells = new Set(loadedState.openedCells);
+    mineLocations = new Set(loadedState.mineLocations);
+    flaggedCells = new Set(loadedState.flaggedCells);
   }
 
+  console.log('loadedState in main', loadedState);
   openedCells.forEach((cell) => {
     const [i, j] = cell.split(',').map(Number);
-    const cellElement = container.children[i * SIZE + j];
+    const cellElement = container.children[i * fieldSize + j];
     const cellContent = cellElement.children[0];
 
     cellElement.classList.remove('cell');
@@ -186,6 +202,8 @@ function handleRightClick(cell, i, j, e) {
   }
 
   saveGameState(
+    fieldSize,
+    mines,
     moves,
     startTime,
     firstMoveMade,
@@ -193,7 +211,8 @@ function handleRightClick(cell, i, j, e) {
     board,
     mineLocations,
     openedCells,
-    flaggedCells
+    flaggedCells,
+    difficulty
   );
 }
 
@@ -225,7 +244,7 @@ function handleLeftClick(cell, cellContent, i, j) {
     gameOver = true;
     restartButton.buttonContent.textContent = `💩`;
     setTimeout(() => {
-      alert(GAME_OVER_MSG);
+      alert('Game over. Try again');
     }, 100);
 
     loseSound.play();
@@ -238,12 +257,14 @@ function handleLeftClick(cell, cellContent, i, j) {
         restartButton.buttonContent.textContent = restartEmoji;
       }, 200);
     }
-    if (openedCells.size === SIZE * SIZE - MINES) {
+    if (openedCells.size === fieldSize * fieldSize - mines) {
       winGame(startTime, moves, gameOver, intervalId);
     }
   }
 
   saveGameState(
+    fieldSize,
+    mines,
     moves,
     startTime,
     firstMoveMade,
@@ -251,14 +272,15 @@ function handleLeftClick(cell, cellContent, i, j) {
     board,
     mineLocations,
     openedCells,
-    flaggedCells
+    flaggedCells,
+    difficulty
   );
 }
 
 function placeMines(i, j) {
-  while (mineLocations.size < MINES) {
-    const x = Math.floor(Math.random() * SIZE);
-    const y = Math.floor(Math.random() * SIZE);
+  while (mineLocations.size < mines) {
+    const x = Math.floor(Math.random() * fieldSize);
+    const y = Math.floor(Math.random() * fieldSize);
 
     if (!mineLocations.has(`${x},${y}`) && (x !== i || y !== j)) {
       mineLocations.add(`${x},${y}`);
@@ -270,19 +292,19 @@ function placeMines(i, j) {
 }
 
 function calculateNumbers() {
-  for (let x = 0; x < SIZE; x++) {
-    for (let y = 0; y < SIZE; y++) {
+  for (let x = 0; x < fieldSize; x++) {
+    for (let y = 0; y < fieldSize; y++) {
       if (board[x][y] !== 'M') {
         let mines = 0;
 
         for (
           let dx = Math.max(x - 1, 0);
-          dx <= Math.min(x + 1, SIZE - 1);
+          dx <= Math.min(x + 1, fieldSize - 1);
           dx++
         ) {
           for (
             let dy = Math.max(y - 1, 0);
-            dy <= Math.min(y + 1, SIZE - 1);
+            dy <= Math.min(y + 1, fieldSize - 1);
             dy++
           ) {
             if (board[dx][dy] === 'M') {
@@ -314,7 +336,7 @@ function startTimer() {
 function showMines() {
   for (const mineLocation of mineLocations) {
     const [mineX, mineY] = mineLocation.split(',').map(Number);
-    const mineCell = container.children[mineX * SIZE + mineY];
+    const mineCell = container.children[mineX * fieldSize + mineY];
     mineCell.classList.remove('cell');
     mineCell.classList.add('mine');
     mineCell.children[0].textContent = 'M';
@@ -322,10 +344,18 @@ function showMines() {
 }
 
 export function openAdjacentCells(i, j) {
-  for (let dx = Math.max(i - 1, 0); dx <= Math.min(i + 1, SIZE - 1); dx++) {
-    for (let dy = Math.max(j - 1, 0); dy <= Math.min(j + 1, SIZE - 1); dy++) {
+  for (
+    let dx = Math.max(i - 1, 0);
+    dx <= Math.min(i + 1, fieldSize - 1);
+    dx++
+  ) {
+    for (
+      let dy = Math.max(j - 1, 0);
+      dy <= Math.min(j + 1, fieldSize - 1);
+      dy++
+    ) {
       if (!openedCells.has(`${dx},${dy}`) && board[dx][dy] !== 'M') {
-        const cell = container.children[dx * SIZE + dy];
+        const cell = container.children[dx * fieldSize + dy];
         const cellContent = cell.children[0];
         cell.classList.remove('cell');
         cell.classList.add('number');
@@ -340,4 +370,52 @@ export function openAdjacentCells(i, j) {
   }
 }
 
-initializeGame();
+function updateDifficulty() {
+  localStorage.removeItem('minesweeperGameState');
+
+  difficulty = difficultySelect.value;
+
+  const newMines = parseInt(minesInput.value);
+
+  switch (difficulty) {
+    case 'easy':
+      fieldSize = EASY.size;
+      mines = newMines;
+      break;
+    case 'medium':
+      fieldSize = MEDIUM.size;
+      mines = newMines;
+      break;
+    case 'hard':
+      fieldSize = HARD.size;
+      mines = newMines;
+      break;
+  }
+  board = Array(fieldSize)
+    .fill()
+    .map(() => Array(fieldSize).fill(0));
+  mineLocations = new Set();
+
+  saveGameState(
+    fieldSize,
+    mines,
+    moves,
+    startTime,
+    firstMoveMade,
+    gameOver,
+    board,
+    mineLocations,
+    openedCells,
+    flaggedCells,
+    difficulty
+  );
+
+  initializeGame();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  initializeGame();
+});
+
+difficultySelect.addEventListener('change', updateDifficulty);
+minesInput.addEventListener('input', updateDifficulty);

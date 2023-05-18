@@ -2,7 +2,7 @@ import { showNumber } from './showNumber.js';
 
 export function loadGameState(
   container,
-  SIZE,
+  fieldSize,
   updateTimeDisplay,
   updateMovesDisplay,
   startTimer
@@ -11,6 +11,8 @@ export function loadGameState(
 
   if (gameState) {
     let {
+      fieldSize: savedSize,
+      mines: savedMines,
       moves: savedMoves,
       startTime: savedStartTime,
       firstMoveMade: savedFirstMoveMade,
@@ -22,8 +24,10 @@ export function loadGameState(
     } = JSON.parse(gameState);
 
     const state = {
+      fieldSize: savedSize,
+      mines: savedMines,
       moves: savedMoves,
-      startTime: savedStartTime ? new Date(savedStartTime) : null,
+      startTime: savedStartTime ? new Date(savedStartTime) : new Date(),
       firstMoveMade: savedFirstMoveMade,
       gameOver: savedGameOver,
       board: savedBoard,
@@ -39,11 +43,12 @@ export function loadGameState(
     updateTimeDisplay(
       Math.floor((Date.now() - state.startTime.getTime()) / 1000)
     );
+
     updateMovesDisplay(state.moves);
 
-    for (let i = 0; i < SIZE; i++) {
-      for (let j = 0; j < SIZE; j++) {
-        const cell = container.children[i * SIZE + j];
+    for (let i = 0; i < fieldSize; i++) {
+      for (let j = 0; j < fieldSize; j++) {
+        const cell = container.children[i * fieldSize + j];
         const cellContent = cell.children[0];
 
         if (state.flaggedCells.has(`${i},${j}`)) {

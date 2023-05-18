@@ -1,4 +1,6 @@
 export function saveGameState(
+  fieldSize,
+  mines,
   moves,
   startTime,
   firstMoveMade,
@@ -6,9 +8,12 @@ export function saveGameState(
   board,
   mineLocations,
   openedCells,
-  flaggedCells
+  flaggedCells,
+  difficulty
 ) {
   let gameState = {
+    fieldSize,
+    mines,
     moves,
     startTime: startTime ? startTime.getTime() : null,
     firstMoveMade,
@@ -17,6 +22,7 @@ export function saveGameState(
     mineLocations: Array.from(mineLocations),
     openedCells: Array.from(openedCells),
     flaggedCells: Array.from(flaggedCells),
+    difficulty,
   };
 
   localStorage.setItem('minesweeperGameState', JSON.stringify(gameState));
