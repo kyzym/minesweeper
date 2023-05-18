@@ -8,7 +8,6 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  // background-color: $body-bg-color;
   background: rgb(238, 174, 202);
   background: radial-gradient(
     circle,
@@ -24,7 +23,7 @@ body {
 
 .controls {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   width: 100%;
   padding: 1rem;
 }
@@ -48,6 +47,12 @@ body {
   font-weight: bold;
   color: $border-color;
   font-size: 3.5rem;
+}
+
+.controls-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
 }
 
 .cell {
@@ -115,11 +120,27 @@ body {
 .difficulty-select,
 .mines-input {
   font-size: 1.5rem;
+  padding: 1rem;
   margin: 0 0.5rem;
-  padding: 0.25rem;
   border: 1px solid $border-color;
   border-radius: 0.25rem;
-  background-color: white;
+  background-color: $minesweeper-bg-color;
+  color: $border-color;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    border-color: darken($border-color, 15%);
+    box-shadow: 0 0 0.5rem rgba($border-color, 0.5);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: darken($border-color, 30%);
+    box-shadow: 0 0 0.7rem rgba($border-color, 0.7);
+  }
+  &:disabled {
+    background-color: white;
+    color: rgba(0, 0, 0, 0.301);
+  }
 }
 
 .mines-input {

@@ -16,22 +16,27 @@ let firstMoveMade = false;
 let gameOver = false;
 let intervalId = null;
 let difficulty = 'easy';
-let movesEmoji = '👞';
-let timeEmoji = '⏱';
+let movesEmoji = '👟';
+let timeEmoji = '⏲️';
 let restartEmoji = '😊';
 
 const EASY = { size: 10 };
 const MEDIUM = { size: 15 };
 const HARD = { size: 25 };
 
-const controlsContainer = document.createElement('div');
-controlsContainer.className = 'controls';
+const controls = createDiv('controls');
+
+const difficultyContainer = createDiv('difficulty-container');
+controls.appendChild(difficultyContainer);
 
 const difficultySelect = document.createElement('select');
-const minesInput = document.createElement('input');
-
 difficultySelect.className = 'difficulty-select';
+
+const minesInput = document.createElement('input');
 minesInput.className = 'mines-input';
+
+difficultyContainer.appendChild(difficultySelect);
+difficultyContainer.appendChild(minesInput);
 
 difficultySelect.innerHTML = `
   <option value="easy">Easy (10x10)</option>
@@ -44,9 +49,6 @@ minesInput.min = 10;
 minesInput.max = 99;
 minesInput.value = mines;
 
-controlsContainer.appendChild(difficultySelect);
-controlsContainer.appendChild(minesInput);
-
 export let board = Array(fieldSize)
   .fill()
   .map(() => Array(fieldSize).fill(0));
@@ -56,6 +58,8 @@ let flaggedCells = new Set();
 
 const gameContainer = createDiv('game-container');
 const container = createDiv('minesweeper');
+const controlsContainer = createDiv('controls-container');
+controls.appendChild(controlsContainer);
 const timeDisplay = createDiv('time-display', 'control');
 const movesDisplay = createDiv('moves-display', 'control');
 const restartButton = createButton(
@@ -65,7 +69,7 @@ const restartButton = createButton(
 );
 
 document.body.appendChild(gameContainer);
-gameContainer.appendChild(controlsContainer);
+gameContainer.appendChild(controls);
 gameContainer.appendChild(container);
 
 controlsContainer.appendChild(timeDisplay);
