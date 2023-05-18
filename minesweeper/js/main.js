@@ -121,7 +121,6 @@ function initializeGame() {
     flaggedCells = new Set(loadedState.flaggedCells);
   }
 
-  console.log('loadedState in main', loadedState);
   openedCells.forEach((cell) => {
     const [i, j] = cell.split(',').map(Number);
     const cellElement = container.children[i * fieldSize + j];
